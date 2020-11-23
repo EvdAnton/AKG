@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Lab._1.Types;
+using Lab1.ObjReader.Model;
 
-namespace Lab._1
+namespace Lab1.ObjReader
 {
     public class ObjReader
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Lab._1.Types
+namespace Lab1.ObjReader.Model
 {
     public class VertexType
     {

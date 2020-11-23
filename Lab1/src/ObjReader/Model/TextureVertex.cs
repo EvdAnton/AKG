@@ -1,4 +1,6 @@
-﻿namespace Lab._1.Types
+﻿using Lab1.Extensions;
+
+namespace Lab1.ObjReader.Model
 {
     public class TextureVertex : VertexType
     {

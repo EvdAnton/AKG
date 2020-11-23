@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace Lab._1
+namespace Lab1.Extensions
 {
     public static class Extension
     {
