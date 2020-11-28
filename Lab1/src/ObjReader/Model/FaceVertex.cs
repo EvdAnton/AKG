@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Extreme.Mathematics;
 using Lab1.Extensions;
 
 namespace Lab1.ObjReader.Model
@@ -9,10 +10,10 @@ namespace Lab1.ObjReader.Model
         private const string PREFIX = "f";
 
         public FaceVertex() : base(MINIMUM_VERTEX_LENGTH, PREFIX) { }
-        
-        public int[] Vertex { get; private set; }
-        public int[] TextureVertex { get; private set; }
-        public int[] NormalVertex { get; private set; }
+
+        public Vector<int> Vertex { get; private set; }
+        public Vector<int> TextureVertex { get; private set; }
+        public Vector<int> NormalVertex{ get; private set; }
 
         public override void ProcessData(string[] data)
         {
@@ -36,9 +37,9 @@ namespace Lab1.ObjReader.Model
 
         private void InitializeVertexes(int vCount)
         {
-            Vertex = new int[vCount];
-            TextureVertex = new int[vCount];
-            NormalVertex = new int[vCount];
+            Vertex = Vector.Create<int>(vCount);
+            TextureVertex = Vector.Create<int>(vCount);
+            NormalVertex = Vector.Create<int>(vCount);
         }
 
         public override string ToString()

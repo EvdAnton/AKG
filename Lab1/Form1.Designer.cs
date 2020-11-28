@@ -36,15 +36,16 @@
             // 
             // View
             // 
+            this.View.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.View.Location = new System.Drawing.Point(12, 12);
             this.View.Name = "View";
-            this.View.Size = new System.Drawing.Size(867, 497);
+            this.View.Size = new System.Drawing.Size(915, 634);
             this.View.TabIndex = 0;
             this.View.TabStop = false;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 558);
+            this.button1.Location = new System.Drawing.Point(12, 707);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(140, 57);
             this.button1.TabIndex = 1;
@@ -56,7 +57,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(897, 627);
+            this.ClientSize = new System.Drawing.Size(939, 776);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.View);
             this.Name = "Form1";

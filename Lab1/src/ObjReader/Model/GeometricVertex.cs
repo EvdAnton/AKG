@@ -1,4 +1,5 @@
-﻿using Lab1.Extensions;
+﻿using Extreme.Mathematics;
+using Lab1.Extensions;
 
 namespace Lab1.ObjReader.Model
 {
@@ -8,20 +9,24 @@ namespace Lab1.ObjReader.Model
         private const string PREFIX = "v";
         
         public GeometricVertex() : base(MINIMUM_VERTEX_LENGTH, PREFIX) { }
-        
-        public decimal X { get; private set; }
 
-        public decimal Y { get; private set; }
+        public Vector<float> Vertex { get; private set; }
 
-        public decimal Z { get; private set; }
+        public float X { get; private set; }
+
+        public float Y { get; private set; }
+
+        public float Z { get; private set; }
 
         public override void ProcessData(string[] data)
         {
             base.ProcessData(data);
 
-            X = data.GetDecimalByIndex(1, nameof(X));
-            Y = data.GetDecimalByIndex(2, nameof(Y));
-            Z = data.GetDecimalByIndex(3, nameof(Z));
+            X = data.GetFloatByIndex(1, nameof(X));
+            Y = data.GetFloatByIndex(2, nameof(Y));
+            Z = data.GetFloatByIndex(3, nameof(Z));
+
+            Vertex = Vector.Create(X, Y, Z);
         }
 
         public override string ToString()

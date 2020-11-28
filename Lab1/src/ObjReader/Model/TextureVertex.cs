@@ -9,17 +9,17 @@ namespace Lab1.ObjReader.Model
 
         public TextureVertex() : base(MINIMUM_VERTEX_LENGTH, PREFIX) { }
         
-        public decimal U { get; private set; }
-        public decimal V { get; private set; }
-        public decimal W { get; private set; }
+        public float U { get; private set; }
+        public float V { get; private set; }
+        public float W { get; private set; }
 
         public override void ProcessData(string[] data)
         {
             base.ProcessData(data);
             
-            U = data.GetDecimalByIndex(1, nameof(U));
-            V = data.GetDecimalByIndex(2, nameof(V));
-            W = data.GetDecimalByIndex(3, nameof(W));
+            U = data.GetFloatByIndex(1, nameof(U));
+            V = data.GetFloatByIndex(2, nameof(V));
+            W = data.GetFloatByIndex(3, nameof(W));
         }
         
         public override string ToString()
