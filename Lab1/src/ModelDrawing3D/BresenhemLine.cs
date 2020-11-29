@@ -3,8 +3,17 @@ using System.Drawing;
 
 namespace Lab1.ModelDrawing3D
 {
-    public static class BresenhemLine
+    public struct BresenhemLine
     {
+        public BresenhemLine(float x0, float y0, float x1, float y1)
+        {
+            FromPoint = new Point<float>(x0, y0);
+            ToPoint = new Point<float>(x1, y1);
+        }
+        
+        public Point<float> FromPoint { get; }
+        public Point<float> ToPoint { get; }
+        
         public static void Draw(Graphics g, Brush brush, float x0, float y0, 
             float x1, float y1)
         {
@@ -50,6 +59,18 @@ namespace Lab1.ModelDrawing3D
         private static void DrawPoint(Graphics g, Brush brush, float x, float y)
         {
             g.FillRectangle(brush, x, y, 1, 1);
+        }
+        
+        public readonly struct Point<T> where T: struct
+        {
+            public Point(T x, T y)
+            {
+                X = x;
+                Y = y;
+            }
+        
+            public T X { get; }
+            public T Y { get; }
         }
     }
 }

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Globalization;
-using Extreme.Mathematics;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Lab1.Extensions
 {
     public static class Extension
     {
-        public static void Add(this Vector<int> vertex, int i, string[] parts, int index)
+        public static void Add(this Vector<float> vertex, int i, string[] parts, int index)
         {
             if(parts.Length < index) return;
 

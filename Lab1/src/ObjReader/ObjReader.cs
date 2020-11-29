@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
+using System.Linq;
+using Lab1.ModelDrawing3D;
 using Lab1.ObjReader.Model;
 
 namespace Lab1.ObjReader
@@ -31,6 +34,22 @@ namespace Lab1.ObjReader
             foreach (var line in data)
             {
                 ProcessLine(line);
+            }
+        }
+
+        public IEnumerable<BresenhemLine> GetLines()
+        {
+            foreach (var face in FaceVertices)
+            {
+                var faceVertex = face.Vertex.Select(Convert.ToInt32).ToList();
+                
+                for (var j = 0; j < 3; j++)
+                {
+                    var v0 = GeometricVertices[faceVertex[j] - 1];
+                    var v1 = GeometricVertices[faceVertex[(j + 1) % 3] - 1];
+
+                    yield return new BresenhemLine(v0.X, v0.Y, v1.X, v1.Y);
+                }
             }
         }
 

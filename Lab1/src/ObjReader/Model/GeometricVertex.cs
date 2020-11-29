@@ -1,5 +1,5 @@
-﻿using Extreme.Mathematics;
-using Lab1.Extensions;
+﻿using Lab1.Extensions;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Lab1.ObjReader.Model
 {
@@ -26,7 +26,7 @@ namespace Lab1.ObjReader.Model
             Y = data.GetFloatByIndex(2, nameof(Y));
             Z = data.GetFloatByIndex(3, nameof(Z));
 
-            Vertex = Vector.Create(X, Y, Z);
+            Vertex = Vector<float>.Build.Dense(new[] {X, Y, Z});
         }
 
         public override string ToString()

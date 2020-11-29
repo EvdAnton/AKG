@@ -23,20 +23,16 @@ namespace Lab1.ModelDrawing3D
 
         public void Draw()
         {
-            foreach (var face in ObjReader.FaceVertices)
+            var lines = ObjReader.GetLines();
+            
+            foreach (var line in lines)
             {
-                for (var j = 0; j < 3; j++)
-                {
-                    var v0 = ObjReader.GeometricVertices[face.Vertex[j] - 1];
-                    var v1 = ObjReader.GeometricVertices[face.Vertex[(j + 1) % 3] - 1];
-
-                    var x0 = (v0.X + 1) * WIDTH;
-                    var y0 = 2 * HEIGHT - (v0.Y + 1) * HEIGHT;
-                    var x1 = (v1.X + 1) * WIDTH;
-                    var y1 = 2 * HEIGHT - (v1.Y + 1) * HEIGHT;
-                    
-                    BresenhemLine.Draw(_graphics, Brush, x0, y0, x1, y1);
-                }
+                var x0 = (line.FromPoint.X + 1) * WIDTH;
+                var y0 = 2 * HEIGHT - (line.FromPoint.Y + 1) * HEIGHT;
+                var x1 = (line.ToPoint.X + 1) * WIDTH;
+                var y1 = 2 * HEIGHT - (line.ToPoint.Y + 1) * HEIGHT;
+                
+                BresenhemLine.Draw(_graphics, Brush, x0, y0, x1, y1);
             }
         }
     }

@@ -1,6 +1,6 @@
 ﻿using System.Text;
-using Extreme.Mathematics;
 using Lab1.Extensions;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Lab1.ObjReader.Model
 {
@@ -11,9 +11,9 @@ namespace Lab1.ObjReader.Model
 
         public FaceVertex() : base(MINIMUM_VERTEX_LENGTH, PREFIX) { }
 
-        public Vector<int> Vertex { get; private set; }
-        public Vector<int> TextureVertex { get; private set; }
-        public Vector<int> NormalVertex{ get; private set; }
+        public Vector<float> Vertex { get; private set; }
+        public Vector<float> TextureVertex { get; private set; }
+        public Vector<float> NormalVertex{ get; private set; }
 
         public override void ProcessData(string[] data)
         {
@@ -37,9 +37,9 @@ namespace Lab1.ObjReader.Model
 
         private void InitializeVertexes(int vCount)
         {
-            Vertex = Vector.Create<int>(vCount);
-            TextureVertex = Vector.Create<int>(vCount);
-            NormalVertex = Vector.Create<int>(vCount);
+            Vertex = Vector<float>.Build.Dense(vCount);
+            TextureVertex = Vector<float>.Build.Dense(vCount);
+            NormalVertex = Vector<float>.Build.Dense(vCount);
         }
 
         public override string ToString()
@@ -47,16 +47,16 @@ namespace Lab1.ObjReader.Model
             var b = new StringBuilder();
             b.Append("f ");
 
-            for (var i = 0; i < Vertex.Length; i++)
+            for (var i = 0; i < Vertex.Count; i++)
             {
                 b.AppendFormat( $"{Vertex[i]}");
                 
-                if (i < TextureVertex.Length)
+                if (i < TextureVertex.Count)
                 {
                     b.AppendFormat($"/{TextureVertex[i]}");
                 }
                 
-                if (i < NormalVertex.Length)
+                if (i < NormalVertex.Count)
                 {
                     b.AppendFormat($"/{NormalVertex[i]} ");
                 }
