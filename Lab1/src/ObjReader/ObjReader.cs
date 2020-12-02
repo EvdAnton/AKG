@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Lab1.ModelDrawing3D;
 using Lab1.ObjReader.Model;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Lab1.ObjReader
 {
@@ -37,7 +38,7 @@ namespace Lab1.ObjReader
             }
         }
 
-        public IEnumerable<BresenhemLine> GetLines()
+        public IEnumerable<BresenhemLine> GetVertices(Matrix<float> transformMatrix)
         {
             foreach (var face in FaceVertices)
             {
@@ -45,10 +46,10 @@ namespace Lab1.ObjReader
                 
                 for (var j = 0; j < 3; j++)
                 {
-                    var v0 = GeometricVertices[faceVertex[j] - 1];
-                    var v1 = GeometricVertices[faceVertex[(j + 1) % 3] - 1];
+                    var v0 = transformMatrix * GeometricVertices[faceVertex[j] - 1].Vertex;
+                    var v1 = transformMatrix * GeometricVertices[faceVertex[(j + 1) % 3] - 1].Vertex;
 
-                    yield return new BresenhemLine(v0.X, v0.Y, v1.X, v1.Y);
+                    yield return new BresenhemLine(v0[0], v0[1], v1[0], v1[1]);
                 }
             }
         }

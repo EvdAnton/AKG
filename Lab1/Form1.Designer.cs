@@ -37,9 +37,11 @@
             // View
             // 
             this.View.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.View.Location = new System.Drawing.Point(12, 12);
+            this.View.Location = new System.Drawing.Point(0, 0);
+            this.View.Margin = new System.Windows.Forms.Padding(0);
             this.View.Name = "View";
-            this.View.Size = new System.Drawing.Size(915, 634);
+            this.View.Size = new System.Drawing.Size(600, 600);
+            this.View.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.View.TabIndex = 0;
             this.View.TabStop = false;
             // 
@@ -57,13 +59,15 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(939, 776);
+            this.ClientSize = new System.Drawing.Size(782, 753);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.View);
             this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize) (this.View)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
         }
 
         private System.Windows.Forms.PictureBox View;

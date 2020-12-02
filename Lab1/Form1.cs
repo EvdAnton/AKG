@@ -25,9 +25,14 @@ namespace Lab1
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var wireModel = new WireModel(_objReader, _graphics, _brush);
+            //button1.Visible = false;
+            _graphics.Clear(Color.White);
             
-            wireModel.Draw();
+            var wireModel = new WireModel(_objReader, _graphics);
+
+            var matrix = MathNetExtension.GetResultMatrix(View.Width - 300, View.Height - 300);
+            
+            wireModel.Draw(_brush, matrix);
         }
         
         

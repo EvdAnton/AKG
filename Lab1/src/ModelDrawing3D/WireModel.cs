@@ -1,4 +1,5 @@
 using System.Drawing;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Lab1.ModelDrawing3D
 {
@@ -6,33 +7,24 @@ namespace Lab1.ModelDrawing3D
     
     public class WireModel
     {
-        private const int WIDTH  = 400;
-        private const int HEIGHT = 400;
-
         private readonly Graphics _graphics;
         
-        private Brush Brush { get; set; }
-        private ObjReader.ObjReader ObjReader { get; set; }
+        private ObjReader.ObjReader ObjReader { get; }
 
-        public WireModel(ObjReader.ObjReader objReader, Graphics graphics, Brush brush)
+        public WireModel(ObjReader.ObjReader objReader, Graphics graphics)
         {
-            Brush = brush;
             _graphics = graphics;
             ObjReader = objReader;
         }
 
-        public void Draw()
+        public void Draw(Brush brush, Matrix<float> transformMatrix)
         {
-            var lines = ObjReader.GetLines();
+            var bresenhemLines = ObjReader.GetVertices(transformMatrix);
             
-            foreach (var line in lines)
+            foreach (var line in bresenhemLines)
             {
-                var x0 = (line.FromPoint.X + 1) * WIDTH;
-                var y0 = 2 * HEIGHT - (line.FromPoint.Y + 1) * HEIGHT;
-                var x1 = (line.ToPoint.X + 1) * WIDTH;
-                var y1 = 2 * HEIGHT - (line.ToPoint.Y + 1) * HEIGHT;
-                
-                BresenhemLine.Draw(_graphics, Brush, x0, y0, x1, y1);
+                BresenhemLine.Draw(_graphics, brush, line.FromPoint.X, line.FromPoint.Y, line.ToPoint.X,
+                    line.ToPoint.Y);
             }
         }
     }
