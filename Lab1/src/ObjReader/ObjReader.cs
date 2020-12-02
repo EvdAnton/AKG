@@ -6,6 +6,8 @@ using System.Linq;
 using Lab1.ModelDrawing3D;
 using Lab1.ObjReader.Model;
 using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Complex;
+using MathNet.Spatial.Euclidean;
 
 namespace Lab1.ObjReader
 {
@@ -38,7 +40,7 @@ namespace Lab1.ObjReader
             }
         }
 
-        public IEnumerable<BresenhemLine> GetVertices(Matrix<float> transformMatrix)
+        public IEnumerable<Line3D> GetVertices()
         {
             foreach (var face in FaceVertices)
             {
@@ -46,10 +48,10 @@ namespace Lab1.ObjReader
                 
                 for (var j = 0; j < 3; j++)
                 {
-                    var v0 = transformMatrix * GeometricVertices[faceVertex[j] - 1].Vertex;
-                    var v1 = transformMatrix * GeometricVertices[faceVertex[(j + 1) % 3] - 1].Vertex;
+                    var v0 = GeometricVertices[faceVertex[j] - 1].Vertex;
+                    var v1 = GeometricVertices[faceVertex[(j + 1) % 3] - 1].Vertex;
 
-                    yield return new BresenhemLine(v0[0], v0[1], v1[0], v1[1]);
+                    yield return new Line3D(v0, v1);
                 }
             }
         }
@@ -87,4 +89,17 @@ namespace Lab1.ObjReader
             }
         }
     }
+
+    public readonly struct Line3D
+    {
+        public Line3D(Vector<float> startVector, Vector<float> endVector)
+        {
+            StartVector = startVector;
+            EndVector = endVector;
+        }
+
+        public Vector<float> StartVector { get; }
+        public Vector<float> EndVector { get; }
+    }
+
 }
