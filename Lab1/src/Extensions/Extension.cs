@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Globalization;
 using MathNet.Numerics.LinearAlgebra;
 
@@ -25,6 +26,13 @@ namespace Lab1.Extensions
             if (!success) throw new ArgumentException($"Could not parse {parameterNaming} parameter as float");
 
             return x;
+        }
+
+        public static void ClearAndDrawImage(this Graphics graphics, Image image)
+        {
+            graphics.Clear(Color.White);
+            graphics.DrawImage(image, new Point(0, 0));
+            image.Dispose();
         }
     }
 }

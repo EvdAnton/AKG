@@ -29,25 +29,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.View = new System.Windows.Forms.PictureBox();
             this.button1 = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize) (this.View)).BeginInit();
             this.SuspendLayout();
-            // 
-            // View
-            // 
-            this.View.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.View.Location = new System.Drawing.Point(0, 0);
-            this.View.Margin = new System.Windows.Forms.Padding(0);
-            this.View.Name = "View";
-            this.View.Size = new System.Drawing.Size(600, 600);
-            this.View.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.View.TabIndex = 0;
-            this.View.TabStop = false;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 707);
+            this.button1.Location = new System.Drawing.Point(12, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(140, 57);
             this.button1.TabIndex = 1;
@@ -57,20 +44,21 @@
             // 
             // Form1
             // 
+            this.AccessibleRole = System.Windows.Forms.AccessibleRole.Window;
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(782, 753);
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.ClientSize = new System.Drawing.Size(857, 705);
             this.Controls.Add(this.button1);
-            this.Controls.Add(this.View);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.KeyPreview = true;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize) (this.View)).EndInit();
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.ResumeLayout(false);
-            this.PerformLayout();
         }
-
-        private System.Windows.Forms.PictureBox View;
 
         private System.Windows.Forms.Button button1;
 

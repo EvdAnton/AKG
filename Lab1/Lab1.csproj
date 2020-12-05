@@ -101,6 +101,9 @@
         <None Include="App.config" />
     </ItemGroup>
     <ItemGroup>
+      <Content Include="resources\Cube.obj">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
       <Content Include="resources\Model.obj">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>

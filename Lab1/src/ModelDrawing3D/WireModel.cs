@@ -5,33 +5,37 @@ using MathNet.Numerics.LinearAlgebra;
 
 namespace Lab1.ModelDrawing3D
 {
-    // TODO : twice buffer for image?
-    
     public class WireModel
     {
-        private readonly Graphics _graphics;
         private readonly ObjReader.ObjReader _objReader;
-        private readonly Matrix<float> _transformMatrix;
+        private Matrix<float> _transformMatrix;
 
-        public WireModel(string path, Graphics graphics, int width, int height)
+        public WireModel(string path, int width, int height)
         {
-            _graphics = graphics;
-            
             _objReader = ReadDataFromObjFile(path);
             
             _transformMatrix = MathNetExtension.GetResultMatrix(width, height);
         }
 
-        public void Draw(Brush brush)
+        public Bitmap ScaleAndDraw(float scaleValue, Bitmap image)
+        {
+            _transformMatrix = _transformMatrix.ScaleModelMatrix(scaleValue);
+
+            return Draw(image);
+        }
+        
+        public Bitmap Draw(Bitmap image)
         {
             foreach (var line in _objReader.GetVertices())
             {
-                var startVector = line.StartVector * _transformMatrix;
-                var endVector = line.EndVector * _transformMatrix;
-                
-                Draw(_graphics, brush, startVector[0], startVector[1], endVector[0],
-                    endVector[1]);
+                var startVector = _transformMatrix.ScaleModelMatrix(0.5f) * line.StartVector;
+                var endVector = _transformMatrix.ScaleModelMatrix(0.5f) * line.EndVector;
+
+                Draw(startVector[0], startVector[1], endVector[0],
+                    endVector[1], image);
             }
+
+            return image;
         }
         
         private static ObjReader.ObjReader ReadDataFromObjFile(string path)
@@ -45,8 +49,7 @@ namespace Lab1.ModelDrawing3D
             return objReader;
         }
         
-        private static void Draw(Graphics g, Brush brush, float x0, float y0, 
-            float x1, float y1)
+        private void Draw(float x0, float y0, float x1, float y1, Bitmap image)
         {
             var isYSteep = Math.Abs(y1 - y0) > Math.Abs(x1 - x0); 
             
@@ -70,7 +73,13 @@ namespace Lab1.ModelDrawing3D
             var y = y0;
             for (var x = x0; x <= x1; x++)
             {
-                DrawPoint(g, brush, isYSteep ? y : x, isYSteep ? x : y);
+                var tempX = (int)(isYSteep ? y : x);
+                var tempY = (int)(isYSteep ? x : y);
+
+                tempX = CheckValue(tempX, image.Width);
+                tempY = CheckValue(tempY, image.Height);
+                
+                image.SetPixel(tempX, tempY, Color.Black);
                 error -= dy;
                 if (error < 0)
                 {
@@ -79,17 +88,27 @@ namespace Lab1.ModelDrawing3D
                 }
             }
         }
+
+        private static int CheckValue(int value, int maxValue)
+        {
+            if (value >= maxValue)
+            {
+                value = maxValue - 1;
+            }
+
+            if (value < 0)
+            {
+                value = 0;
+            }
+
+            return value;
+        }
         
         private static void Swap(ref float x0, ref float x1)
         {
             var t = x0;
             x0 = x1;
             x1 = t;
-        }
-        
-        private static void DrawPoint(Graphics g, Brush brush, float x, float y)
-        {
-            g.FillRectangle(brush, x, y, 1, 1);
         }
     }
 }

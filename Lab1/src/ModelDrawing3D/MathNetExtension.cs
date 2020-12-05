@@ -7,11 +7,11 @@ namespace Lab1.ModelDrawing3D
 {
     public static class MathNetExtension
     {
-        private static readonly float _tanFov = (float) Math.Tan(45f / 2f);
+        private static readonly float _tanFov = (float) Math.Tan(45f / 360f * Math.PI);
 
-        public static Matrix<float> GetResultMatrix(int width, int height)
+        public static Matrix<float> GetResultMatrix(int width, int height) 
         {
-            var cameraPos = Vector<float>.Build.Dense(new[] {0f, 0f, 2.5f});
+            var cameraPos = Vector<float>.Build.Dense(new[] {0.25f, -0.5f, 2.5f});
             var up = Vector<float>.Build.Dense(new[] {0f, 1f, 0f});
             var frontPos = Vector<float>.Build.Dense(new[] {0f, 0f, -1f});
             
@@ -122,9 +122,10 @@ namespace Lab1.ModelDrawing3D
             lookAt.SetRow(1, cameraUp.AddValueToEnd(0));
             lookAt.SetRow(2, targetDirection.AddValueToEnd(0));
             lookAt.SetRow(3, new[] {0f, 0f, 0f, 1f});
-
+            
             var identityMatrix = GetIdentityMatrix(4, 4);
             identityMatrix.SetColumn(3, -cameraPos.AddValueToEnd(1));
+            identityMatrix[3, 3] = 1f;
 
             return lookAt * identityMatrix;
         }
@@ -139,8 +140,8 @@ namespace Lab1.ModelDrawing3D
             projection[0, 0] = 1f / (aspect * _tanFov);
             projection[1, 1] = 1f / _tanFov;
             projection[2, 2] = zFar / deltaZ;
-            projection[3, 2] = zNear * zFar / deltaZ;
-            projection[3, 3] = -1f;
+            projection[2, 3] = zNear * zFar / deltaZ;
+            projection[3, 2] = -1f;
 
             return projection;
         }
