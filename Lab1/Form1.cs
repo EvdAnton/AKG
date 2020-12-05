@@ -32,25 +32,44 @@ namespace Lab1
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
+            var image = new Bitmap(Width, Height);
             float scaleValue;
+            const float moveStep = 0.05f;
 
             // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (e.KeyCode)
             {
                 case Keys.Q:
                     scaleValue = 1.1f;
+                    image = _wireModel.ScaleAndDraw(scaleValue, image);
                     break;
                 case Keys.E:
                     scaleValue = 0.9f;
+                    image = _wireModel.ScaleAndDraw(scaleValue, image);
                     break;
+                case Keys.W:
+                    image = _wireModel.MoveAndDraw(image, y: moveStep);
+                    break;
+                case Keys.S:
+                    image = _wireModel.MoveAndDraw(image, y: -moveStep);
+                    break;
+                case Keys.A:
+                    image = _wireModel.MoveAndDraw(image, -moveStep);
+                    break;
+                case Keys.D:
+                    image = _wireModel.MoveAndDraw(image, moveStep);
+                    break;
+                case Keys.Z:
+                    image = _wireModel.MoveAndDraw(image, z:-moveStep);
+                    break;
+                case Keys.X:
+                    image = _wireModel.MoveAndDraw(image, z: moveStep);
+                    break;
+                
                 default:
                     return;
             }
 
-            var image = new Bitmap(Width, Height);
-            
-            image = _wireModel.ScaleAndDraw(scaleValue, image);
-            
             _view.ClearAndDrawImage(image);
         }
     }

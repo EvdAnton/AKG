@@ -24,6 +24,13 @@ namespace Lab1.ModelDrawing3D
             return Draw(image);
         }
         
+        public Bitmap MoveAndDraw(Bitmap image, float x = default, float y = default, float z = default)
+        {
+            _transformMatrix = _transformMatrix.MoveModelMatrix(x, y, z);
+
+            return Draw(image);
+        }
+        
         public Bitmap Draw(Bitmap image)
         {
             foreach (var line in _objReader.GetVertices())
