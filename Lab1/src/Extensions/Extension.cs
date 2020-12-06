@@ -28,9 +28,10 @@ namespace Lab1.Extensions
             return x;
         }
 
-        public static void ClearAndDrawImage(this Graphics graphics, Image image)
+        public static void ClearAndDrawImage(this Graphics graphics, Image image, Form1 form1)
         {
-            graphics.Clear(Color.White);
+            form1.Invalidate();
+            graphics.Clear(Color.Black);
             graphics.DrawImage(image, new Point(0, 0));
             image.Dispose();
         }

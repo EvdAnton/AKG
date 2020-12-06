@@ -5,10 +5,12 @@
 x64/
 build/
 bld/
+vs/
 [Bb]in/
 [Oo]bj/
 
 *.idea/
+*.vs/
 
 # NuGet Packages Directory
 packages/*

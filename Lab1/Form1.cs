@@ -18,21 +18,19 @@ namespace Lab1
             InitializeComponent();
             _view = CreateGraphics();
 
-            _wireModel = new WireModel(OBJ_PATH, 600, 600);
+            _wireModel = new WireModel(OBJ_PATH, Width, Height);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var image = new Bitmap(Width, Height);
+            var image = _wireModel.Draw();
             
-            image = _wireModel.Draw(image);
-            
-            _view.ClearAndDrawImage(image);
+            _view.ClearAndDrawImage(image, this);
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            var image = new Bitmap(Width, Height);
+            Bitmap image; 
             float scaleValue;
             const float moveStep = 0.05f;
 
@@ -41,36 +39,36 @@ namespace Lab1
             {
                 case Keys.Q:
                     scaleValue = 1.1f;
-                    image = _wireModel.ScaleAndDraw(scaleValue, image);
+                    image = _wireModel.ScaleAndDraw(scaleValue);
                     break;
                 case Keys.E:
                     scaleValue = 0.9f;
-                    image = _wireModel.ScaleAndDraw(scaleValue, image);
+                    image = _wireModel.ScaleAndDraw(scaleValue);
                     break;
                 case Keys.W:
-                    image = _wireModel.MoveAndDraw(image, y: moveStep);
+                    image = _wireModel.MoveAndDraw(y: moveStep);
                     break;
                 case Keys.S:
-                    image = _wireModel.MoveAndDraw(image, y: -moveStep);
+                    image = _wireModel.MoveAndDraw(y: -moveStep);
                     break;
                 case Keys.A:
-                    image = _wireModel.MoveAndDraw(image, -moveStep);
+                    image = _wireModel.MoveAndDraw(-moveStep);
                     break;
                 case Keys.D:
-                    image = _wireModel.MoveAndDraw(image, moveStep);
+                    image = _wireModel.MoveAndDraw(moveStep);
                     break;
                 case Keys.Z:
-                    image = _wireModel.MoveAndDraw(image, z:-moveStep);
+                    image = _wireModel.MoveAndDraw(z:-moveStep);
                     break;
                 case Keys.X:
-                    image = _wireModel.MoveAndDraw(image, z: moveStep);
+                    image = _wireModel.MoveAndDraw(z: moveStep);
                     break;
                 
                 default:
                     return;
             }
 
-            _view.ClearAndDrawImage(image);
+            _view.ClearAndDrawImage(image, this);
         }
     }
 }
