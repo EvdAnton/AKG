@@ -16,9 +16,9 @@ namespace Lab1.ObjReader.Model
 
         public NormalVertex() : base(MINIMUM_VERTEX_LENGTH, PREFIX) { }
         
-        public override void ProcessData(string[] data)
+        public override void ProcessData(string[] data, float maxValue = default)
         {
-            base.ProcessData(data);
+            base.ProcessData(data, maxValue);
             
             I = data.GetFloatByIndex(1, nameof(I));
             J = data.GetFloatByIndex(2, nameof(J));

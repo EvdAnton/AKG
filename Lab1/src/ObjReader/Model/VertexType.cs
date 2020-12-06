@@ -13,7 +13,7 @@ namespace Lab1.ObjReader.Model
             _prefix = prefix;
         }
         
-        public virtual void ProcessData(string[] data)
+        public virtual void ProcessData(string[] data, float maxValue = default)
         {
             if (data.Length < _minimumVertexLength)
                 throw new ArgumentException($"Input array must be of minimum length {_minimumVertexLength} data");

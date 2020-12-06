@@ -1,5 +1,5 @@
-﻿using System.Drawing;
-using System.Net;
+﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 using Lab1.ModelDrawing3D;
 
@@ -22,6 +22,7 @@ namespace Lab1
         public Form1()
         {
             InitializeComponent();
+            
             _context = BufferedGraphicsManager.Current;
 
             _context.MaximumBuffer = new Size(Width, Height);
@@ -122,10 +123,17 @@ namespace Lab1
             var xOffset = e.X - _lastXPos;
             var yOffset = _lastYPos - e.Y;
             
-            if(xOffset < 1 && yOffset < 1)
+            if(Math.Abs(xOffset) < 1 && Math.Abs(yOffset) < 1)
                 return;
             
             var image = _wireModel.ProcessMouseMovement(xOffset, yOffset);
+            
+            UpdateGraphics(image);
+        }
+        
+        private void OnMouseWheel(object sender, MouseEventArgs e)
+        {
+            var image = _wireModel.ProcessMouseScroll(e.Delta);
             
             UpdateGraphics(image);
         }

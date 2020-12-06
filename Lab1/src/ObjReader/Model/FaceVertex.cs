@@ -15,9 +15,9 @@ namespace Lab1.ObjReader.Model
         public Vector<float> TextureVertex { get; private set; }
         public Vector<float> NormalVertex{ get; private set; }
 
-        public override void ProcessData(string[] data)
+        public override void ProcessData(string[] data, float maxValue = default)
         {
-            base.ProcessData(data);
+            base.ProcessData(data, maxValue);
             
             var vCount = data.Length - 1;
             

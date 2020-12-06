@@ -17,15 +17,15 @@ namespace Lab1.ObjReader.Model
         public float Z { get; private set; }
         public float W { get; private set; }
 
-        public override void ProcessData(string[] data)
+        public override void ProcessData(string[] data, float maxValue = default)
         {
-            base.ProcessData(data);
+            base.ProcessData(data, maxValue);
 
             W = data.GetFloatByIndex(4, nameof(W), 1);
             
-            X = data.GetFloatByIndex(1, nameof(X)) / W;
-            Y = data.GetFloatByIndex(2, nameof(Y)) / W;
-            Z = data.GetFloatByIndex(3, nameof(Z)) / W;
+            X = data.GetFloatByIndex(1, nameof(X)) / W / maxValue;
+            Y = data.GetFloatByIndex(2, nameof(Y)) / W / maxValue;
+            Z = data.GetFloatByIndex(3, nameof(Z)) / W / maxValue;
             
             Vertex = Vector<float>.Build.Dense(new[] {X, Y, Z, W});
         }

@@ -12,33 +12,32 @@ namespace Lab1.ModelDrawing3D
     
     public class Camera
     {
-        
         private const float YAW         = -90.0f;
         private const float PITCH       =  0.0f;
         private const float SPEED       =  0.05f;
         private const float SENSITIVITY =  0.1f;
         private const float ZOOM        =  45.0f;
-        
-        public Vector<float> Position { get; set; }
-        public Vector<float> Front { get; set; }
-        public Vector<float> Up { get; set; }
-        public Vector<float> Right { get; set; }
-        public Vector<float> WorldUp { get; set; }
-        public float MovementSpeed { get; set; }
 
-        public float MouseSensitivity { get; set; }
-        public float Zoom { get; set; }
+        private Vector<float> Position { get; set; }
+        private Vector<float> Front { get; set; }
+        private Vector<float> Up { get; set; }
+        private Vector<float> Right { get; set; }
+        private Vector<float> WorldUp { get; set; }
+        private float MovementSpeed { get; set; }
+
+        private float MouseSensitivity { get; set; }
+        private float Zoom { get; set; }
 
         private float _yaw;
         private float _pitch;
-        
-        public float Yaw
+
+        private float Yaw
         {
             get => _yaw;
             set => _yaw = value / 180f * (float) Math.PI;
         }
 
-        public float Pitch
+        private float Pitch
         {
             get => _pitch;
             set => _pitch = value / 180f * (float) Math.PI;
@@ -63,6 +62,12 @@ namespace Lab1.ModelDrawing3D
         {
             return MathNetExtension.GetViewMatrix(Position, Position + Front, Up);
         }
+
+        public Matrix<float> GetProjectionMatrix(int width, int height)
+        {
+            return MathNetExtension.GetProjectionMatrix(Zoom, width / (float)height, 0.1f, 1000f);
+        }        
+        
         
         public void ProcessKeyboard(CameraMovement direction)
         {
@@ -112,7 +117,7 @@ namespace Lab1.ModelDrawing3D
             if (Zoom < 1.0f)
                 Zoom = 1.0f;
             if (Zoom > 45.0f)
-                Zoom = 45.0f; 
+                Zoom = 45.0f;
         }
         
         private void UpdateCameraVectors()

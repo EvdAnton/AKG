@@ -8,8 +8,6 @@ namespace Lab1.ModelDrawing3D
     public static class MathNetExtension
     {
         private static readonly Matrix<float> _scaleMatrix = GetIdentityMatrix(4, 4);
-        
-        private static readonly float _tanFov = (float) Math.Tan(45f / 360f * Math.PI);
 
         public static Matrix<float> Move(this Matrix<float> modelMatrix, float x, float y, float z)
         {
@@ -118,15 +116,16 @@ namespace Lab1.ModelDrawing3D
             return lookAt * identityMatrix;
         }
 
-        public static Matrix<float> GetProjectionMatrix(int width, int height, float zNear, float zFar)
+        public static Matrix<float> GetProjectionMatrix(float fov ,float aspect, float zNear, float zFar)
         {
+            var tanFov = (float)Math.Tan(Math.PI * fov / 180f / 2);
+            
             var deltaZ = zNear - zFar;
-            var aspect = width / height;
 
             var projection = Matrix<float>.Build.Dense(4, 4);
 
-            projection[0, 0] = 1f / (aspect * _tanFov);
-            projection[1, 1] = 1f / _tanFov;
+            projection[0, 0] = 1f / (aspect * tanFov);
+            projection[1, 1] = 1f / tanFov;
             projection[2, 2] = zFar / deltaZ;
             projection[2, 3] = zNear * zFar / deltaZ;
             projection[3, 2] = -1f;

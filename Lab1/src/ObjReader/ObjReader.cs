@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Lab1.Extensions;
 using Lab1.ObjReader.Model;
 using MathNet.Numerics.LinearAlgebra;
 
@@ -14,6 +15,8 @@ namespace Lab1.ObjReader
         public List<TextureVertex> TextureVertices { get; }
 
         public List<NormalVertex> NormalVertices { get; }
+
+        private float _maxValue;
 
         public ObjReader()
         {
@@ -30,7 +33,14 @@ namespace Lab1.ObjReader
 
         private void ReadObjFile(IEnumerable<string> data)
         {
-            foreach (var line in data)
+            var lines = data as string[] ?? data.ToArray();
+            
+            foreach (var line in lines)
+            {
+                FindMaxValue(line);
+            }
+            
+            foreach (var line in lines)
             {
                 ProcessLine(line);
             }
@@ -38,16 +48,34 @@ namespace Lab1.ObjReader
 
         public IEnumerable<Line3D> GetVertices()
         {
-            foreach (var face in FaceVertices)
+            foreach (var faceVertex in FaceVertices.Select(face => face.Vertex.Select(Convert.ToInt32).ToList()))
             {
-                var faceVertex = face.Vertex.Select(Convert.ToInt32).ToList();
-                
                 for (var j = 0; j < 3; j++)
                 {
                     var v0 = GeometricVertices[faceVertex[j] - 1].Vertex;
                     var v1 = GeometricVertices[faceVertex[(j + 1) % 3] - 1].Vertex;
 
                     yield return new Line3D(v0, v1);
+                }
+            }
+        }
+
+        private void FindMaxValue(string line)
+        {
+            var parts = line.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length <= 0)
+            {
+                return;
+            }
+
+            if (parts[0] == "v")
+            {
+                for (var i = 1; i < parts.Length - 1; i++)
+                {
+                    var value = parts.GetFloatByIndex(i);
+
+                    if (_maxValue < value)
+                        _maxValue = value;
                 }
             }
         }
@@ -64,7 +92,7 @@ namespace Lab1.ObjReader
             {
                 case "v":
                     var vertex = new GeometricVertex();
-                    vertex.ProcessData(parts);
+                    vertex.ProcessData(parts, _maxValue);
                     GeometricVertices.Add(vertex);
                     break;
                 case "f":

@@ -13,9 +13,9 @@ namespace Lab1.ObjReader.Model
         public float V { get; private set; }
         public float W { get; private set; }
 
-        public override void ProcessData(string[] data)
+        public override void ProcessData(string[] data, float maxValue = default)
         {
-            base.ProcessData(data);
+            base.ProcessData(data, maxValue);
             
             U = data.GetFloatByIndex(1, nameof(U));
             V = data.GetFloatByIndex(2, nameof(V));

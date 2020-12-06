@@ -22,6 +22,7 @@ namespace Lab1.ModelDrawing3D
         private Matrix<float> _transformMatrix;
         private Matrix<float> _modelMatrix;
         private Matrix<float> _viewMatrix;
+        private Matrix<float> _projectionMatrix;
         private Camera _camera;
 
         public WireModel(string path, int width, int height)
@@ -34,8 +35,9 @@ namespace Lab1.ModelDrawing3D
             
             _camera = new Camera();
             _viewMatrix = _camera.GetViewMatrix();
+            _projectionMatrix = _camera.GetProjectionMatrix(WIDTH, HEIGHT);
             
-            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
             
             _rgbValues = new byte[width * height];
         }
@@ -45,15 +47,15 @@ namespace Lab1.ModelDrawing3D
         {
             _modelMatrix = _modelMatrix.Scale(scaleValue);
 
-            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
 
             return Draw();
         }
 
-        private static Matrix<float> GetResultMatrix(Matrix<float> viewMatrix, Matrix<float> modelMatrix)
+        private static Matrix<float> GetResultMatrix(Matrix<float> viewMatrix, Matrix<float> modelMatrix, Matrix<float> projectionMatrix)
         {
             return MathNetExtension.GetViewPortMatrix(WIDTH / 2f, HEIGHT / 2f)
-                   * MathNetExtension.GetProjectionMatrix(WIDTH, HEIGHT, 0.1f, 1000f)
+                   * projectionMatrix
                    * viewMatrix
                    * modelMatrix;
         }
@@ -61,7 +63,7 @@ namespace Lab1.ModelDrawing3D
         public Bitmap XRotationAndDraw(float angel)
         {
             _modelMatrix = _modelMatrix.XRotate(angel);
-            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
 
             return Draw();
         }
@@ -69,7 +71,7 @@ namespace Lab1.ModelDrawing3D
         public Bitmap YRotationAndDraw(float angel)
         {
             _modelMatrix = _modelMatrix.YRotate(angel);
-            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
 
             return Draw();
         }
@@ -78,7 +80,7 @@ namespace Lab1.ModelDrawing3D
         public Bitmap ZRotationAndDraw(float angel)
         {
             _modelMatrix = _modelMatrix.ZRotate(angel);
-            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
 
             return Draw();
         }
@@ -87,7 +89,7 @@ namespace Lab1.ModelDrawing3D
         {
             _modelMatrix = _modelMatrix.Move(x, y, z);
             
-            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
 
             return Draw();
         }
@@ -97,7 +99,7 @@ namespace Lab1.ModelDrawing3D
             _camera.ProcessKeyboard(direction);
             _viewMatrix = _camera.GetViewMatrix();
 
-            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
             
             return Draw();
         }
@@ -107,8 +109,18 @@ namespace Lab1.ModelDrawing3D
             _camera.ProcessMouseMovement(xOffset, yOffset);
             _viewMatrix = _camera.GetViewMatrix();
             
-            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
             
+            return Draw();
+        }
+
+        public Bitmap ProcessMouseScroll(float yOffset)
+        {
+            _camera.ProcessMouseScroll(yOffset);
+            _projectionMatrix = _camera.GetProjectionMatrix(WIDTH, HEIGHT);
+            
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
+
             return Draw();
         }
 
