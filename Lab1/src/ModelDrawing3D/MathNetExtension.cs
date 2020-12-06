@@ -7,21 +7,11 @@ namespace Lab1.ModelDrawing3D
 {
     public static class MathNetExtension
     {
+        private static readonly Matrix<float> _scaleMatrix = GetIdentityMatrix(4, 4);
+        
         private static readonly float _tanFov = (float) Math.Tan(45f / 360f * Math.PI);
 
-        public static Matrix<float> GetResultMatrix(int width, int height) 
-        {
-            var cameraPos = Vector<float>.Build.Dense(new[] {0.25f, -0.5f, 2.5f});
-            var up = Vector<float>.Build.Dense(new[] {0f, 1f, 0f});
-            var frontPos = Vector<float>.Build.Dense(new[] {0f, 0f, -1f});
-            
-            return GetViewPortMatrix(width / 2f, height / 2f)
-                   * GetProjectionMatrix(width, height, 0.1f, 1000f)
-                   * GetViewMatrix(cameraPos, cameraPos + frontPos, up)
-                   * GetModelMatrix();
-        }
-
-        public static Matrix<float> MoveModelMatrix(this Matrix<float> modelMatrix, float x, float y, float z)
+        public static Matrix<float> Move(this Matrix<float> modelMatrix, float x, float y, float z)
         {
             var displacementMatrix = GetIdentityMatrix(4, 4);
 
@@ -32,18 +22,16 @@ namespace Lab1.ModelDrawing3D
             return modelMatrix * displacementMatrix;
         }
 
-        public static Matrix<float> ScaleModelMatrix(this Matrix<float> modelMatrix, float scale)
+        public static Matrix<float> Scale(this Matrix<float> modelMatrix, float scale)
         {
-            var scaleMatrix = GetIdentityMatrix(4, 4);
-
-            scaleMatrix[0, 0] = scale;
-            scaleMatrix[1, 1] = scale;
-            scaleMatrix[2, 2] = scale;
-
-            return modelMatrix * scaleMatrix;
+            _scaleMatrix[0, 0] = scale;
+            _scaleMatrix[1, 1] = scale;
+            _scaleMatrix[2, 2] = scale;
+            
+            return modelMatrix * _scaleMatrix;
         }
         
-        public static Matrix<float> XRotateModelMatrix(this Matrix<float> modelMatrix, double angel)
+        public static Matrix<float> XRotate(this Matrix<float> modelMatrix, double angel)
         {
             var xRotationMatrix = GetIdentityMatrix(4, 4);
 
@@ -60,7 +48,7 @@ namespace Lab1.ModelDrawing3D
             return modelMatrix * xRotationMatrix;
         }
         
-        public static Matrix<float> YRotateModelMatrix(this Matrix<float> modelMatrix, double angel)
+        public static Matrix<float> YRotate(this Matrix<float> modelMatrix, double angel)
         {
             var yRotationMatrix = GetIdentityMatrix(4, 4);
 
@@ -77,7 +65,7 @@ namespace Lab1.ModelDrawing3D
             return modelMatrix * yRotationMatrix;
         }
         
-        public static Matrix<float> ZRotateModelMatrix(this Matrix<float> modelMatrix, double angel)
+        public static Matrix<float> ZRotate(this Matrix<float> modelMatrix, double angel)
         {
             var zRotationMatrix = GetIdentityMatrix(4, 4);
 
@@ -99,13 +87,13 @@ namespace Lab1.ModelDrawing3D
             return Matrix<float>.Build.DenseIdentity(rows, columns);
         }
         
-        private static Matrix<float> GetModelMatrix()
+        public static Matrix<float> GetModelMatrix()
         {
             return GetIdentityMatrix(4, 4);
         }
 
 
-        private static Matrix<float> GetViewMatrix(Vector<float> cameraPos, Vector<float> frontPosition,
+        public static Matrix<float> GetViewMatrix(Vector<float> cameraPos, Vector<float> frontPosition,
             Vector<float> upPosition)
         {
             var targetDirection = (cameraPos - frontPosition)
@@ -130,7 +118,7 @@ namespace Lab1.ModelDrawing3D
             return lookAt * identityMatrix;
         }
 
-        private static Matrix<float> GetProjectionMatrix(int width, int height, float zNear, float zFar)
+        public static Matrix<float> GetProjectionMatrix(int width, int height, float zNear, float zFar)
         {
             var deltaZ = zNear - zFar;
             var aspect = width / height;
@@ -146,7 +134,7 @@ namespace Lab1.ModelDrawing3D
             return projection;
         }
 
-        private static Matrix<float> GetViewPortMatrix(float halfOfWidth, float halfOfHeight)
+        public static Matrix<float> GetViewPortMatrix(float halfOfWidth, float halfOfHeight)
         {
             var viewportMatrix = GetIdentityMatrix(4, 4);
 
@@ -158,7 +146,7 @@ namespace Lab1.ModelDrawing3D
             return viewportMatrix;
         }
         
-        private static Vector<float> CrossProduct(this IList<float> left, IList<float> right)
+        public static Vector<float> CrossProduct(this IList<float> left, IList<float> right)
         {
             if (left.Count != 3 || right.Count != 3)
                 throw new ArgumentException();

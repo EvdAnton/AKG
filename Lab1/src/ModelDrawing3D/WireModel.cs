@@ -11,13 +11,18 @@ namespace Lab1.ModelDrawing3D
     public class WireModel
     {
         private const byte WHITE = 255;
+        private const int WIDTH = 600;
+        private const int HEIGHT = 600;
         
         private readonly ObjReader.ObjReader _objReader;
         private readonly int _height;
         private readonly int _width;
+        private readonly byte[] _rgbValues;
         
         private Matrix<float> _transformMatrix;
-        private readonly byte[] _rgbValues;
+        private Matrix<float> _modelMatrix;
+        private Matrix<float> _viewMatrix;
+        private Camera _camera;
 
         public WireModel(string path, int width, int height)
         {
@@ -25,33 +30,96 @@ namespace Lab1.ModelDrawing3D
             _height = height;
             
             _objReader = ReadDataFromObjFile(path);
-
-            _transformMatrix = MathNetExtension.GetResultMatrix(600, 600);
+            _modelMatrix = MathNetExtension.GetModelMatrix();
+            
+            _camera = new Camera();
+            _viewMatrix = _camera.GetViewMatrix();
+            
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+            
             _rgbValues = new byte[width * height];
         }
 
+
         public Bitmap ScaleAndDraw(float scaleValue)
         {
-            _transformMatrix = _transformMatrix.ScaleModelMatrix(scaleValue);
+            _modelMatrix = _modelMatrix.Scale(scaleValue);
+
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+
+            return Draw();
+        }
+
+        private static Matrix<float> GetResultMatrix(Matrix<float> viewMatrix, Matrix<float> modelMatrix)
+        {
+            return MathNetExtension.GetViewPortMatrix(WIDTH / 2f, HEIGHT / 2f)
+                   * MathNetExtension.GetProjectionMatrix(WIDTH, HEIGHT, 0.1f, 1000f)
+                   * viewMatrix
+                   * modelMatrix;
+        }
+
+        public Bitmap XRotationAndDraw(float angel)
+        {
+            _modelMatrix = _modelMatrix.XRotate(angel);
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+
+            return Draw();
+        }
+
+        public Bitmap YRotationAndDraw(float angel)
+        {
+            _modelMatrix = _modelMatrix.YRotate(angel);
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
 
             return Draw();
         }
         
+        
+        public Bitmap ZRotationAndDraw(float angel)
+        {
+            _modelMatrix = _modelMatrix.ZRotate(angel);
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+
+            return Draw();
+        }
+
         public Bitmap MoveAndDraw(float x = default, float y = default, float z = default)
         {
-            _transformMatrix = _transformMatrix.MoveModelMatrix(x, y, z);
+            _modelMatrix = _modelMatrix.Move(x, y, z);
+            
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
 
             return Draw();
         }
         
-        public Bitmap Draw()
+        public Bitmap CameraMovement(CameraMovement direction)
+        {
+            _camera.ProcessKeyboard(direction);
+            _viewMatrix = _camera.GetViewMatrix();
+
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+            
+            return Draw();
+        }
+
+        public Bitmap ProcessMouseMovement(float xOffset, float yOffset)
+        {
+            _camera.ProcessMouseMovement(xOffset, yOffset);
+            _viewMatrix = _camera.GetViewMatrix();
+            
+            _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix);
+            
+            return Draw();
+        }
+
+        private Bitmap Draw()
         {
             Array.Clear(_rgbValues, 0, _rgbValues.Length);
 
             foreach (var line in _objReader.GetVertices())
             {
-                var startVector = _transformMatrix.ScaleModelMatrix(0.5f) * line.StartVector;
-                var endVector = _transformMatrix.ScaleModelMatrix(0.5f) * line.EndVector;
+                var startVector = _transformMatrix.Scale(0.5f) * line.StartVector;
+                var endVector = _transformMatrix.Scale(0.5f) * line.EndVector;
 
                 Draw(startVector[0], startVector[1], endVector[0],
                     endVector[1], _rgbValues);
