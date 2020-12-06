@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using Lab1.ModelDrawing3D;
 using Lab1.ObjReader.Model;
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearAlgebra.Complex;
-using MathNet.Spatial.Euclidean;
 
 namespace Lab1.ObjReader
 {

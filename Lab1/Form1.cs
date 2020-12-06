@@ -1,7 +1,5 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
-using Lab1.Extensions;
 using Lab1.ModelDrawing3D;
 
 namespace Lab1
@@ -11,21 +9,20 @@ namespace Lab1
         private const string OBJ_PATH = "/Resources/Model.obj";
         
         private readonly WireModel _wireModel;
-        private readonly Graphics _view;
+        private readonly BufferedGraphicsContext _context;
+        private BufferedGraphics _buffer;
 
         public Form1()
         {
             InitializeComponent();
-            _view = CreateGraphics();
+            _context = BufferedGraphicsManager.Current;
+
+            _context.MaximumBuffer = new Size(Width, Height);
+
+            _buffer = _context.Allocate(CreateGraphics(),
+                new Rectangle( 0, 0, Width, Height ));
 
             _wireModel = new WireModel(OBJ_PATH, Width, Height);
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            var image = _wireModel.Draw();
-            
-            _view.ClearAndDrawImage(image, this);
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -68,7 +65,20 @@ namespace Lab1
                     return;
             }
 
-            _view.ClearAndDrawImage(image, this);
+            UpdateGraphics(image);
+        }
+        
+        private void UpdateGraphics(Image image)
+        {
+            _buffer?.Dispose();
+            
+            _buffer = _context.Allocate(CreateGraphics(), new Rectangle(0, 0, Width, Height));
+
+            _buffer.Graphics.DrawImage(image, new Point(0, 0));
+            
+            _buffer.Render();
+            
+            image.Dispose();
         }
     }
 }
