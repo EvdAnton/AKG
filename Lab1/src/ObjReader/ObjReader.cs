@@ -46,7 +46,7 @@ namespace Lab1.ObjReader
             }
         }
 
-        public IEnumerable<Line3D> GetVertices()
+        public IEnumerable<Line3D> GetLines()
         {
             foreach (var faceVertex in FaceVertices.Select(face => face.Vertex.Select(Convert.ToInt32).ToList()))
             {
@@ -58,6 +58,15 @@ namespace Lab1.ObjReader
                     yield return new Line3D(v0, v1);
                 }
             }
+        }
+        
+        public IEnumerable<Triangle> GetTriangles()
+        {
+            return FaceVertices.Select(face => face.Vertex.Select(Convert.ToInt32).ToList())
+                .Select(faceVertex => new Triangle(
+                    GeometricVertices[faceVertex[0] - 1].Vertex,
+                    GeometricVertices[faceVertex[1] - 1].Vertex,
+                    GeometricVertices[faceVertex[2] - 1].Vertex));
         }
 
         private void FindMaxValue(string line)
@@ -111,6 +120,20 @@ namespace Lab1.ObjReader
                     NormalVertices.Add(normalVertex);
                     break;
             }
+        }
+    }
+
+    public readonly struct Triangle
+    {
+        public Vector<float> V0 { get; }
+        public Vector<float> V1 { get; }
+        public Vector<float> V2 { get; }
+
+        public Triangle(Vector<float> v0, Vector<float> v1, Vector<float> v2)
+        {
+            V0 = v0;
+            V1 = v1;
+            V2 = v2;
         }
     }
 

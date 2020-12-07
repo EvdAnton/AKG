@@ -23,7 +23,7 @@ namespace Lab1.ModelDrawing3D
         private Matrix<float> _modelMatrix;
         private Matrix<float> _viewMatrix;
         private Matrix<float> _projectionMatrix;
-        private Camera _camera;
+        private readonly Camera _camera;
 
         public WireModel(string path, int width, int height)
         {
@@ -91,7 +91,7 @@ namespace Lab1.ModelDrawing3D
             
             _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
 
-            return Draw();
+            return DrawTriangles();
         }
         
         public Bitmap CameraMovement(CameraMovement direction)
@@ -128,13 +128,34 @@ namespace Lab1.ModelDrawing3D
         {
             Array.Clear(_rgbValues, 0, _rgbValues.Length);
 
-            foreach (var line in _objReader.GetVertices())
+            foreach (var line in _objReader.GetLines())
             {
                 var startVector = _transformMatrix.Scale(0.5f) * line.StartVector;
                 var endVector = _transformMatrix.Scale(0.5f) * line.EndVector;
 
-                Draw(startVector[0], startVector[1], endVector[0],
-                    endVector[1], _rgbValues);
+                DrawLine(startVector[0], startVector[1], endVector[0],
+                    endVector[1]);
+            }
+
+            var bitmap = GetBitmapFromList(_rgbValues);
+            
+            return bitmap;
+        }
+        
+        private Bitmap DrawTriangles()
+        {
+            Array.Clear(_rgbValues, 0, _rgbValues.Length);
+
+            foreach (var triangle in _objReader.GetTriangles())
+            {
+                var v0 = _transformMatrix.Scale(0.5f) * triangle.V0;
+                var v1 = _transformMatrix.Scale(0.5f) * triangle.V1;
+                var v2 = _transformMatrix.Scale(0.5f) * triangle.V2;
+                
+                var vertices = new List<Vector<float>> {v0, v1, v2};
+                vertices.Sort((first, second) => first[1].CompareTo(second[1]));
+                
+                DrawTriangle(vertices[0], vertices[1], vertices[2]);
             }
 
             var bitmap = GetBitmapFromList(_rgbValues);
@@ -142,27 +163,47 @@ namespace Lab1.ModelDrawing3D
             return bitmap;
         }
 
-        private static ObjReader.ObjReader ReadDataFromObjFile(string path)
+        private void DrawTriangle(Vector<float> v0, Vector<float> v1, Vector<float> v2)
         {
-            var objReader = new ObjReader.ObjReader();
+            if(Math.Abs(v0[1] - v1[1]) < float.Epsilon && Math.Abs(v0[1] - v2[1]) < float.Epsilon)
+                return;
 
-            path = Directory.GetCurrentDirectory() + path;
+            var totalHeight = (int)(v2[1] - v0[1]);
             
-            objReader.ReadObjFile(path);
+            for (var i = 0; i < totalHeight; i++)
+            {
+                var isSecondHalf = i > v1[1] - v0[1] || Math.Abs(v1[1] - v0[1]) < float.Epsilon;
+                var segmentHeight = isSecondHalf ? v2[1] - v1[1] : v1[1] - v0[1];
 
-            return objReader;
+                var alpha = (float) i / totalHeight;
+                var beta = (i - (isSecondHalf ? v1[1] - v0[1] : 0)) / segmentHeight;
+                
+                var vertexA = v0 + (v2 - v0) * alpha;
+                var vertexB = isSecondHalf ? v1 + (v2 - v1) * beta : v0 + (v1 - v0) * beta;
+
+                var minX = (int)Math.Min(vertexA[0], vertexB[0]);
+                var length = (int)Math.Abs(vertexA[0] - vertexB[0]) + minX;
+
+                for (var j = minX; j <= length; j++)
+                {
+                    var tempX = CheckValue(j, _width);
+                    var tempY = CheckValue((int)(v0[1] + i), _height);
+                    
+                    _rgbValues[tempY * _width + tempX] = (byte) j;
+                }
+            }
         }
         
-        private void Draw(float x0, float y0, float x1, float y1, IList<byte> rgbValues)
+        private void DrawLine(float x0, float y0, float x1, float y1)
         {
             var isYSteep = Math.Abs(y1 - y0) > Math.Abs(x1 - x0); 
-            
+
             if (isYSteep)
             {
                 Swap(ref x0, ref y0);
                 Swap(ref x1, ref y1);
             }
-            
+
             if (x0 > x1)
             {
                 Swap(ref x0, ref x1);
@@ -171,7 +212,7 @@ namespace Lab1.ModelDrawing3D
 
             var dx = x1 - x0;
             var dy = Math.Abs(y1 - y0);
-            
+
             var error = dx / 2;
             var yStep = y0 < y1 ? 1 : -1;
             var y = y0;
@@ -182,8 +223,8 @@ namespace Lab1.ModelDrawing3D
 
                 tempX = CheckValue(tempX, _width);
                 tempY = CheckValue(tempY, _height);
-                
-                rgbValues[tempY * _width + tempX] = WHITE;
+
+                _rgbValues[tempY * _width + tempX] = WHITE;
 
                 error -= dy;
                 if (error < 0)
@@ -222,6 +263,18 @@ namespace Lab1.ModelDrawing3D
 
             return value;
         }
+        
+        private static ObjReader.ObjReader ReadDataFromObjFile(string path)
+        {
+            var objReader = new ObjReader.ObjReader();
+
+            path = Directory.GetCurrentDirectory() + path;
+            
+            objReader.ReadObjFile(path);
+
+            return objReader;
+        }
+
         
         private static void Swap(ref float x0, ref float x1)
         {
