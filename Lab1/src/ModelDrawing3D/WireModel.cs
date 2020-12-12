@@ -4,26 +4,28 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
+using Lab1.ObjReader;
 using MathNet.Numerics.LinearAlgebra;
 
 namespace Lab1.ModelDrawing3D
 {
     public class WireModel
     {
-        private const byte WHITE = 255;
+        private const int WHITE = 255;
         private const int WIDTH = 600;
         private const int HEIGHT = 600;
         
         private readonly ObjReader.ObjReader _objReader;
+        private readonly int[] _rgbValues;
+        private readonly Camera _camera;
         private readonly int _height;
         private readonly int _width;
-        private readonly byte[] _rgbValues;
-        
+        private readonly Vector<float> _lightPosition;
+
         private Matrix<float> _transformMatrix;
         private Matrix<float> _modelMatrix;
         private Matrix<float> _viewMatrix;
         private Matrix<float> _projectionMatrix;
-        private readonly Camera _camera;
 
         public WireModel(string path, int width, int height)
         {
@@ -31,15 +33,16 @@ namespace Lab1.ModelDrawing3D
             _height = height;
             
             _objReader = ReadDataFromObjFile(path);
-            _modelMatrix = MathNetExtension.GetModelMatrix();
-            
+
             _camera = new Camera();
             _viewMatrix = _camera.GetViewMatrix();
+            _modelMatrix = MathNetExtension.GetModelMatrix();
             _projectionMatrix = _camera.GetProjectionMatrix(WIDTH, HEIGHT);
             
             _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
-            
-            _rgbValues = new byte[width * height];
+
+            _lightPosition = Vector<float>.Build.Dense(new[] {0f, 0f, 2.5f});
+            _rgbValues = new int[width * height];
         }
 
 
@@ -49,7 +52,7 @@ namespace Lab1.ModelDrawing3D
 
             _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
 
-            return Draw();
+            return DrawTriangles();
         }
 
         private static Matrix<float> GetResultMatrix(Matrix<float> viewMatrix, Matrix<float> modelMatrix, Matrix<float> projectionMatrix)
@@ -65,7 +68,7 @@ namespace Lab1.ModelDrawing3D
             _modelMatrix = _modelMatrix.XRotate(angel);
             _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
 
-            return Draw();
+            return DrawTriangles();
         }
 
         public Bitmap YRotationAndDraw(float angel)
@@ -73,7 +76,7 @@ namespace Lab1.ModelDrawing3D
             _modelMatrix = _modelMatrix.YRotate(angel);
             _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
 
-            return Draw();
+            return DrawTriangles();
         }
         
         
@@ -82,7 +85,7 @@ namespace Lab1.ModelDrawing3D
             _modelMatrix = _modelMatrix.ZRotate(angel);
             _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
 
-            return Draw();
+            return DrawTriangles();
         }
 
         public Bitmap MoveAndDraw(float x = default, float y = default, float z = default)
@@ -101,7 +104,7 @@ namespace Lab1.ModelDrawing3D
 
             _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
             
-            return Draw();
+            return DrawTriangles();
         }
 
         public Bitmap ProcessMouseMovement(float xOffset, float yOffset)
@@ -111,7 +114,7 @@ namespace Lab1.ModelDrawing3D
             
             _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
             
-            return Draw();
+            return DrawTriangles();
         }
 
         public Bitmap ProcessMouseScroll(float yOffset)
@@ -121,27 +124,9 @@ namespace Lab1.ModelDrawing3D
             
             _transformMatrix = GetResultMatrix(_viewMatrix, _modelMatrix, _projectionMatrix);
 
-            return Draw();
+            return DrawTriangles();
         }
 
-        private Bitmap Draw()
-        {
-            Array.Clear(_rgbValues, 0, _rgbValues.Length);
-
-            foreach (var line in _objReader.GetLines())
-            {
-                var startVector = _transformMatrix.Scale(0.5f) * line.StartVector;
-                var endVector = _transformMatrix.Scale(0.5f) * line.EndVector;
-
-                DrawLine(startVector[0], startVector[1], endVector[0],
-                    endVector[1]);
-            }
-
-            var bitmap = GetBitmapFromList(_rgbValues);
-            
-            return bitmap;
-        }
-        
         private Bitmap DrawTriangles()
         {
             Array.Clear(_rgbValues, 0, _rgbValues.Length);
@@ -154,8 +139,11 @@ namespace Lab1.ModelDrawing3D
                 
                 var vertices = new List<Vector<float>> {v0, v1, v2};
                 vertices.Sort((first, second) => first[1].CompareTo(second[1]));
-                
-                DrawTriangle(vertices[0], vertices[1], vertices[2]);
+
+                var colorInInt = GetColorForTriangle(triangle);
+                var color = Color.FromArgb(colorInInt, colorInInt, colorInInt).ToArgb();
+
+                DrawTriangle(vertices[0], vertices[1], vertices[2], color);
             }
 
             var bitmap = GetBitmapFromList(_rgbValues);
@@ -163,7 +151,23 @@ namespace Lab1.ModelDrawing3D
             return bitmap;
         }
 
-        private void DrawTriangle(Vector<float> v0, Vector<float> v1, Vector<float> v2)
+        private int GetColorForTriangle(Triangle triangle)
+        {
+            var resultIntensity = 0f;
+
+            for (var i = 0; i < triangle.Vertexes.Count; i++)
+            {
+                var lightVertex0 = (_lightPosition - triangle.Vertexes[i].RemoveEndValue()).Normalize(1);
+                var intensity = lightVertex0 * triangle.NormalVertexes[i];
+
+                // White is RGB setting in 255
+                resultIntensity += intensity > 0 ? intensity * WHITE : 0;
+            }
+            
+            return  (int) (resultIntensity / 3);
+        }
+
+        private void DrawTriangle(Vector<float> v0, Vector<float> v1, Vector<float> v2, int color)
         {
             if(Math.Abs(v0[1] - v1[1]) < float.Epsilon && Math.Abs(v0[1] - v2[1]) < float.Epsilon)
                 return;
@@ -189,55 +193,14 @@ namespace Lab1.ModelDrawing3D
                     var tempX = CheckValue(j, _width);
                     var tempY = CheckValue((int)(v0[1] + i), _height);
                     
-                    _rgbValues[tempY * _width + tempX] = (byte) j;
+                    _rgbValues[tempY * _width + tempX] = color;
                 }
             }
         }
-        
-        private void DrawLine(float x0, float y0, float x1, float y1)
+
+        private Bitmap GetBitmapFromList(int[] rgbValues)
         {
-            var isYSteep = Math.Abs(y1 - y0) > Math.Abs(x1 - x0); 
-
-            if (isYSteep)
-            {
-                Swap(ref x0, ref y0);
-                Swap(ref x1, ref y1);
-            }
-
-            if (x0 > x1)
-            {
-                Swap(ref x0, ref x1);
-                Swap(ref y0, ref y1);
-            }
-
-            var dx = x1 - x0;
-            var dy = Math.Abs(y1 - y0);
-
-            var error = dx / 2;
-            var yStep = y0 < y1 ? 1 : -1;
-            var y = y0;
-            for (var x = x0; x <= x1; x++)
-            {
-                var tempX = (int)(isYSteep ? y : x);
-                var tempY = (int)(isYSteep ? x : y);
-
-                tempX = CheckValue(tempX, _width);
-                tempY = CheckValue(tempY, _height);
-
-                _rgbValues[tempY * _width + tempX] = WHITE;
-
-                error -= dy;
-                if (error < 0)
-                {
-                    y += yStep;
-                    error += dx;
-                }
-            }
-        }
-        
-        private Bitmap GetBitmapFromList(byte[] rgbValues)
-        {
-            var bmp = new Bitmap(_width, _height, PixelFormat.Format8bppIndexed);
+            var bmp = new Bitmap(_width, _height, PixelFormat.Format32bppArgb);
             
             var bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), 
                 ImageLockMode.ReadOnly, bmp.PixelFormat);
@@ -273,14 +236,6 @@ namespace Lab1.ModelDrawing3D
             objReader.ReadObjFile(path);
 
             return objReader;
-        }
-
-        
-        private static void Swap(ref float x0, ref float x1)
-        {
-            var t = x0;
-            x0 = x1;
-            x1 = t;
         }
     }
 }

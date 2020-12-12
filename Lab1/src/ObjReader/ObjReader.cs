@@ -10,12 +10,10 @@ namespace Lab1.ObjReader
 {
     public class ObjReader
     {
-        public List<GeometricVertex> GeometricVertices { get; }
-        public List<FaceVertex> FaceVertices { get; }
-        public List<TextureVertex> TextureVertices { get; }
-
-        public List<NormalVertex> NormalVertices { get; }
-
+        private List<GeometricVertex> GeometricVertices { get; }
+        private List<FaceVertex> FaceVertices { get; }
+        private List<TextureVertex> TextureVertices { get; }
+        private List<NormalVertex> NormalVertices { get; }
         private float _maxValue;
 
         public ObjReader()
@@ -34,39 +32,26 @@ namespace Lab1.ObjReader
         private void ReadObjFile(IEnumerable<string> data)
         {
             var lines = data as string[] ?? data.ToArray();
-            
             foreach (var line in lines)
             {
                 FindMaxValue(line);
             }
-            
+
             foreach (var line in lines)
             {
                 ProcessLine(line);
             }
         }
 
-        public IEnumerable<Line3D> GetLines()
-        {
-            foreach (var faceVertex in FaceVertices.Select(face => face.Vertex.Select(Convert.ToInt32).ToList()))
-            {
-                for (var j = 0; j < 3; j++)
-                {
-                    var v0 = GeometricVertices[faceVertex[j] - 1].Vertex;
-                    var v1 = GeometricVertices[faceVertex[(j + 1) % 3] - 1].Vertex;
-
-                    yield return new Line3D(v0, v1);
-                }
-            }
-        }
-        
         public IEnumerable<Triangle> GetTriangles()
         {
-            return FaceVertices.Select(face => face.Vertex.Select(Convert.ToInt32).ToList())
-                .Select(faceVertex => new Triangle(
-                    GeometricVertices[faceVertex[0] - 1].Vertex,
-                    GeometricVertices[faceVertex[1] - 1].Vertex,
-                    GeometricVertices[faceVertex[2] - 1].Vertex));
+            return from face in FaceVertices
+                let faceVertex = face.Vertex.Select(Convert.ToInt32).ToList()
+                let normalVertex = face.NormalVertex.Select(Convert.ToInt32).ToList()
+                select new Triangle(NormalVertices[normalVertex[0] - 1].Vertex,
+                    NormalVertices[normalVertex[1] - 1].Vertex, NormalVertices[normalVertex[2] - 1].Vertex,
+                    GeometricVertices[faceVertex[0] - 1].Vertex, GeometricVertices[faceVertex[1] - 1].Vertex,
+                    GeometricVertices[faceVertex[2] - 1].Vertex);
         }
 
         private void FindMaxValue(string line)
@@ -82,9 +67,7 @@ namespace Lab1.ObjReader
                 for (var i = 1; i < parts.Length - 1; i++)
                 {
                     var value = parts.GetFloatByIndex(i);
-
-                    if (_maxValue < value)
-                        _maxValue = value;
+                    if (_maxValue < value) _maxValue = value;
                 }
             }
         }
@@ -96,7 +79,7 @@ namespace Lab1.ObjReader
             {
                 return;
             }
-            
+
             switch (parts[0])
             {
                 case "v":
@@ -125,28 +108,24 @@ namespace Lab1.ObjReader
 
     public readonly struct Triangle
     {
+        public List<Vector<float>> Vertexes => new List<Vector<float>> {V0, V1, V2};
+        public List<Vector<float>> NormalVertexes => new List<Vector<float>> {Nv0, Nv1, Nv2};
         public Vector<float> V0 { get; }
         public Vector<float> V1 { get; }
         public Vector<float> V2 { get; }
+        private Vector<float> Nv0 { get; }
+        private Vector<float> Nv1 { get; }
+        private Vector<float> Nv2 { get; }
 
-        public Triangle(Vector<float> v0, Vector<float> v1, Vector<float> v2)
+        public Triangle(Vector<float> nv0, Vector<float> nv1, Vector<float> nv2, Vector<float> v0, Vector<float> v1,
+            Vector<float> v2)
         {
             V0 = v0;
             V1 = v1;
             V2 = v2;
+            Nv0 = nv0;
+            Nv1 = nv1;
+            Nv2 = nv2;
         }
     }
-
-    public readonly struct Line3D
-    {
-        public Line3D(Vector<float> startVector, Vector<float> endVector)
-        {
-            StartVector = startVector;
-            EndVector = endVector;
-        }
-
-        public Vector<float> StartVector { get; }
-        public Vector<float> EndVector { get; }
-    }
-
 }

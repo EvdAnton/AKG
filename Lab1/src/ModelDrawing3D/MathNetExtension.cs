@@ -165,5 +165,14 @@ namespace Lab1.ModelDrawing3D
 
             return Vector<float>.Build.DenseOfEnumerable(result);
         }
+        
+        public static Vector<float> RemoveEndValue(this IEnumerable<float> vector)
+        {
+            var vectorAsArray = vector as float[] ?? vector.ToArray();
+            
+            var result = vectorAsArray.Take(vectorAsArray.Length - 1);
+
+            return Vector<float>.Build.DenseOfEnumerable(result);
+        }
     }
 }
