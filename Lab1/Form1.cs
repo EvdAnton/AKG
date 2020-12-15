@@ -7,7 +7,7 @@ namespace Lab1
 {
     public sealed partial class Form1 : Form
     {
-        private const string OBJ_PATH = "/Resources/Model.obj";
+        private const string OBJ_PATH = "/Resources/Cube.obj";
         private const float ANGEL_ROTATION = 5f;
         private const float MOVE_STEP = 0.05f;
 

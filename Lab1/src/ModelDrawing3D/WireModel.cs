@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Lab1.ObjReader;
 using MathNet.Numerics.LinearAlgebra;
@@ -12,11 +13,12 @@ namespace Lab1.ModelDrawing3D
     public class WireModel
     {
         private const int WHITE = 255;
-        private const int WIDTH = 600;
-        private const int HEIGHT = 600;
+        private const int WIDTH = 400;
+        private const int HEIGHT = 400;
         
         private readonly ObjReader.ObjReader _objReader;
         private readonly int[] _rgbValues;
+        private readonly float[] _zBuffer;
         private readonly Camera _camera;
         private readonly int _height;
         private readonly int _width;
@@ -43,6 +45,7 @@ namespace Lab1.ModelDrawing3D
 
             _lightPosition = Vector<float>.Build.Dense(new[] {0f, 0f, 2.5f});
             _rgbValues = new int[width * height];
+            _zBuffer = new float[width * height];
         }
 
 
@@ -129,7 +132,15 @@ namespace Lab1.ModelDrawing3D
 
         private Bitmap DrawTriangles()
         {
-            Array.Clear(_rgbValues, 0, _rgbValues.Length);
+            for (var i = 0; i < _rgbValues.Length; i++)
+            {
+                _rgbValues[i] = Color.FromArgb(WHITE, WHITE, WHITE).ToArgb();
+            }
+            
+            for (var i = 0; i < _zBuffer.Length; i++)
+            {
+                _zBuffer[i] = 1f;
+            }
 
             foreach (var triangle in _objReader.GetTriangles())
             {
@@ -153,48 +164,80 @@ namespace Lab1.ModelDrawing3D
 
         private int GetColorForTriangle(Triangle triangle)
         {
-            var resultIntensity = 0f;
+            var resultIntensity = triangle.Vertexes
+                .Select(t => (_lightPosition - t.RemoveEndValue()).Normalize(1))
+                .Select((lightVertex, i) => lightVertex * triangle.NormalVertexes[i])
+                .Sum(intensity => intensity > 0 ? intensity * WHITE : 0);
 
-            for (var i = 0; i < triangle.Vertexes.Count; i++)
-            {
-                var lightVertex0 = (_lightPosition - triangle.Vertexes[i].RemoveEndValue()).Normalize(1);
-                var intensity = lightVertex0 * triangle.NormalVertexes[i];
-
-                // White is RGB setting in 255
-                resultIntensity += intensity > 0 ? intensity * WHITE : 0;
-            }
-            
             return  (int) (resultIntensity / 3);
         }
 
-        private void DrawTriangle(Vector<float> v0, Vector<float> v1, Vector<float> v2, int color)
+        private void DrawTriangle(IList<float> v0, IList<float> v1, IList<float> v2, int color)
         {
-            if(Math.Abs(v0[1] - v1[1]) < float.Epsilon && Math.Abs(v0[1] - v2[1]) < float.Epsilon)
+            //if(v0[2] < 0 || v0[2] > 1 || v1[2] < 0 || v1[2] > 1 || v2[2] < 0 || v2[2] > 1)
+            //    return;
+            
+            if(v0[1].Equals(v1[1]) && v0[1].Equals(v2[1]))
                 return;
 
-            var totalHeight = (int)(v2[1] - v0[1]);
+            var totalHeightF = v2[1] - v0[1];
+            var totalHeight = (int)Math.Round(totalHeightF, MidpointRounding.AwayFromZero);
+
+            var yFirstPartFloat = v1[1] - v0[1];
+            var yFirstPart = (int)Math.Round(yFirstPartFloat, MidpointRounding.AwayFromZero);
+
+            var ySecondPartFloat = v2[1] - v1[1];
+            var ySecondPart = (int)Math.Round(ySecondPartFloat, MidpointRounding.AwayFromZero);
             
             for (var i = 0; i < totalHeight; i++)
             {
-                var isSecondHalf = i > v1[1] - v0[1] || Math.Abs(v1[1] - v0[1]) < float.Epsilon;
-                var segmentHeight = isSecondHalf ? v2[1] - v1[1] : v1[1] - v0[1];
+                var isSecondHalf = i > yFirstPart || v1[1].Equals(v0[1]);
+                var segmentHeight = isSecondHalf ? ySecondPartFloat : yFirstPartFloat;
 
-                var alpha = (float) i / totalHeight;
-                var beta = (i - (isSecondHalf ? v1[1] - v0[1] : 0)) / segmentHeight;
+                //if (segmentHeight == 0 || totalHeight == 0) 
+                //    continue;
                 
-                var vertexA = v0 + (v2 - v0) * alpha;
-                var vertexB = isSecondHalf ? v1 + (v2 - v1) * beta : v0 + (v1 - v0) * beta;
+                var alpha = i / totalHeightF;
+                var beta = (i - (isSecondHalf ? yFirstPartFloat : 0)) / segmentHeight;
 
-                var minX = (int)Math.Min(vertexA[0], vertexB[0]);
-                var length = (int)Math.Abs(vertexA[0] - vertexB[0]) + minX;
+                var x1 = v0[0] + (v2[0] - v0[0]) * alpha;
+                var x2 = isSecondHalf ? v1[0] + (v2[0] - v1[0]) * beta : v0[0] + (v1[0] - v0[0]) * beta;
+                
+                var z1 = v0[2] + (v2[2] - v0[2]) * alpha;
+                var z2 = isSecondHalf ? v1[2] + (v2[2] - v1[2]) * beta : v0[2] + (v1[2] - v0[2]) * beta;
 
-                for (var j = minX; j <= length; j++)
+                if (x1 > x2)
                 {
-                    var tempX = CheckValue(j, _width);
-                    var tempY = CheckValue((int)(v0[1] + i), _height);
-                    
-                    _rgbValues[tempY * _width + tempX] = color;
+                    Swap(ref x1, ref x2);
+                    Swap(ref z1, ref z2);
                 }
+
+                x1 = CheckValue((int) Math.Round(x1, MidpointRounding.AwayFromZero), _width);
+                x2 = CheckValue((int) Math.Round(x2, MidpointRounding.AwayFromZero), _width);
+                
+                if (x1.Equals(x2) && x1 < float.Epsilon || x1.Equals(x2) && x1.Equals(_width - 1)) 
+                    continue;
+                
+                var y = CheckValue((int) Math.Round(v0[1], MidpointRounding.AwayFromZero) + i, _height);
+
+                DrawHorizontalLine( y, (int) x1, (int) x2, z1, z2, color);
+            }
+        }
+
+        private void DrawHorizontalLine(int y, int x1, int x2, float z1, float z2, int color)
+        {
+            var yMulWidth = y * _width;
+            var zInc = (z2 - z1) / (x2 - x1 + 1);
+
+            for (var x = x1; x != x2; x++) 
+            {
+                if (_zBuffer[yMulWidth + x] > z1) 
+                {
+                    _zBuffer[yMulWidth + x] = z1;
+                    _rgbValues[yMulWidth + x] = color;    
+                }
+                
+                z1 += zInc;
             }
         }
 
@@ -236,6 +279,13 @@ namespace Lab1.ModelDrawing3D
             objReader.ReadObjFile(path);
 
             return objReader;
+        }
+
+        private static void Swap(ref float first, ref float second)
+        {
+            var temp = first;
+            first = second;
+            second = temp;
         }
     }
 }
