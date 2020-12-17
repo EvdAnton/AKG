@@ -22,10 +22,9 @@ namespace Lab1.ModelDrawing3D
         private Vector<float> Front { get; set; }
         private Vector<float> Up { get; set; }
         private Vector<float> Right { get; set; }
-        private Vector<float> WorldUp { get; set; }
-        private float MovementSpeed { get; set; }
-
-        private float MouseSensitivity { get; set; }
+        private Vector<float> WorldUp { get; }
+        private float MovementSpeed { get; }
+        private float MouseSensitivity { get; }
         private float Zoom { get; set; }
 
         private float _yaw;

@@ -23,9 +23,9 @@ namespace Lab1.ObjReader.Model
 
             W = data.GetFloatByIndex(4, nameof(W), 1);
             
-            X = data.GetFloatByIndex(1, nameof(X)) / W / maxValue;
-            Y = data.GetFloatByIndex(2, nameof(Y)) / W / maxValue;
-            Z = data.GetFloatByIndex(3, nameof(Z)) / W / maxValue;
+            X = data.GetFloatByIndex(1, nameof(X)) / maxValue;
+            Y = data.GetFloatByIndex(2, nameof(Y)) / maxValue;
+            Z = data.GetFloatByIndex(3, nameof(Z)) / maxValue;
             
             Vertex = Vector<float>.Build.Dense(new[] {X, Y, Z, W});
         }
