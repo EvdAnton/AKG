@@ -1,4 +1,5 @@
 ﻿using Lab1.Extensions;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Lab1.ObjReader.Model
 {
@@ -12,6 +13,7 @@ namespace Lab1.ObjReader.Model
         public float U { get; private set; }
         public float V { get; private set; }
         public float W { get; private set; }
+        public Vector<float> Vertex { get; private set; }
 
         public override void ProcessData(string[] data, float maxValue = default)
         {
@@ -20,6 +22,8 @@ namespace Lab1.ObjReader.Model
             U = data.GetFloatByIndex(1, nameof(U));
             V = data.GetFloatByIndex(2, nameof(V));
             W = data.GetFloatByIndex(3, nameof(W));
+
+            Vertex = Vector<float>.Build.Dense(new[] {U, V});
         }
         
         public override string ToString()

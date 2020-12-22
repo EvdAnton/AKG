@@ -48,10 +48,17 @@ namespace Lab1.ObjReader
             return from face in FaceVertices
                 let faceVertex = face.Vertex.Select(Convert.ToInt32).ToList()
                 let normalVertex = face.NormalVertex.Select(Convert.ToInt32).ToList()
-                select new Triangle(NormalVertices[normalVertex[0] - 1].Vertex,
-                    NormalVertices[normalVertex[1] - 1].Vertex, NormalVertices[normalVertex[2] - 1].Vertex,
-                    GeometricVertices[faceVertex[0] - 1].Vertex, GeometricVertices[faceVertex[1] - 1].Vertex,
-                    GeometricVertices[faceVertex[2] - 1].Vertex);
+                let textureVertex = face.TextureVertex.Select(Convert.ToInt32).ToList()
+                select new Triangle(
+                    NormalVertices[normalVertex[0] - 1].Vertex,
+                    NormalVertices[normalVertex[1] - 1].Vertex,
+                    NormalVertices[normalVertex[2] - 1].Vertex,
+                    GeometricVertices[faceVertex[0] - 1].Vertex,
+                    GeometricVertices[faceVertex[1] - 1].Vertex,
+                    GeometricVertices[faceVertex[2] - 1].Vertex,
+                    TextureVertices[textureVertex[0] - 1].Vertex,
+                    TextureVertices[textureVertex[1] - 1].Vertex,
+                    TextureVertices[textureVertex[2] - 1].Vertex);
         }
 
         private void FindMaxValue(string line)
@@ -109,6 +116,7 @@ namespace Lab1.ObjReader
     public readonly struct Triangle
     {
         public List<Vector<float>> Vertexes => new List<Vector<float>> {V0, V1, V2};
+        public List<Vector<float>> TextureVertexes => new List<Vector<float>> {Vt0, Vt1, Vt2};
         public List<Vector<float>> NormalVertexes => new List<Vector<float>> {Nv0, Nv1, Nv2};
         public Vector<float> V0 { get; }
         public Vector<float> V1 { get; }
@@ -116,13 +124,19 @@ namespace Lab1.ObjReader
         private Vector<float> Nv0 { get; }
         private Vector<float> Nv1 { get; }
         private Vector<float> Nv2 { get; }
+        private Vector<float> Vt0 { get; }
+        private Vector<float> Vt1 { get; }
+        private Vector<float> Vt2 { get; }
 
         public Triangle(Vector<float> nv0, Vector<float> nv1, Vector<float> nv2, Vector<float> v0, Vector<float> v1,
-            Vector<float> v2)
+            Vector<float> v2, Vector<float> vt0, Vector<float> vt1, Vector<float> vt2)
         {
             V0 = v0;
             V1 = v1;
             V2 = v2;
+            Vt0 = vt0;
+            Vt1 = vt1;
+            Vt2 = vt2;
             Nv0 = nv0;
             Nv1 = nv1;
             Nv2 = nv2;

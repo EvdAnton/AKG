@@ -158,30 +158,13 @@ namespace Lab1.ModelDrawing3D
             
             foreach (var triangle in _objReader.GetTriangles())
             {
-                var v0 = _viewModelProjection * triangle.V0;
-                var v1 = _viewModelProjection * triangle.V1;
-                var v2 = _viewModelProjection * triangle.V2;
+                var vertices = TransferTriangleInWindowCoordinates(triangle);
 
-                v0 /= v0.Last();
-                v1 /= v1.Last();
-                v2 /= v2.Last();
-                
-                var colorInInt = GetColorForTriangle(triangle);
-                
-                v0 = _viewPortMatrix * v0;
-                v1 = _viewPortMatrix * v1;
-                v2 = _viewPortMatrix * v2;
+                if (IsBackFaceCulling(vertices)) continue;
 
-                var vertices = new List<Vector<float>> {v0, v1, v2};
-
-                if (IsBackFaceCulling(vertices))
-                {
-                    continue;
-                }
-                
                 vertices.Sort((first, second) => first[1].CompareTo(second[1]));
-
-                var color = Color.FromArgb(colorInInt, colorInInt, colorInInt).ToArgb();
+                
+                var color = GetColorForTriangle(triangle);
 
                 DrawTriangle(vertices[0], vertices[1], vertices[2], color);
             }
@@ -191,6 +174,23 @@ namespace Lab1.ModelDrawing3D
             return bitmap;
         }
 
+        private List<Vector<float>> TransferTriangleInWindowCoordinates(Triangle triangle)
+        {
+            var v0 = _viewModelProjection * triangle.V0;
+            var v1 = _viewModelProjection * triangle.V1;
+            var v2 = _viewModelProjection * triangle.V2;
+
+            v0 /= v0.Last();
+            v1 /= v1.Last();
+            v2 /= v2.Last();
+
+            v0 = _viewPortMatrix * v0;
+            v1 = _viewPortMatrix * v1;
+            v2 = _viewPortMatrix * v2;
+            
+            return new List<Vector<float>> {v0, v1, v2};
+        }
+        
         private bool IsBackFaceCulling(IReadOnlyList<Vector<float>> vertices)
         {
             var m = Matrix<float>.Build.Dense(3, 3);
@@ -216,8 +216,10 @@ namespace Lab1.ModelDrawing3D
 
                 resultIntensity += intensity > 0 ? intensity * WHITE : 0;
             }
+
+            var resultColor = (int) (resultIntensity / 3);
             
-            return (int) (resultIntensity / 3);
+            return Color.FromArgb(resultColor, resultColor, resultColor).ToArgb();
         }
 
         private void DrawTriangle(IList<float> v0, IList<float> v1, IList<float> v2, int color)
